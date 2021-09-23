@@ -71,10 +71,12 @@ def bfs(maze):
     ey, ex = maze.circlePoints()[0]
     R, C = maze.getDimensions()
 
+    # data structure needed
     que = deque()
     vis = [[False for _ in range(C)] for _ in range(R)]
     pre = [[(-1, -1) for _ in range(C)] for _ in range(R)]
 
+    # logic begins
     que.append((sy, sx))
     vis[sy][sx] = True
     while que:
@@ -119,6 +121,7 @@ def astar(maze):
                 h_val = manhatten_dist((r, c), (ey, ex))
                 h[r][c] = h_val
 
+    # init state
     g = [[INF for _ in range(C)] for _ in range(R)]
     g[sy][sx] = 0
     f = [[INF for _ in range(C)] for _ in range(R)]
@@ -162,9 +165,9 @@ def find_min_cost_edge_using_manhatten_dist(selected, un_selected):
     return min_val, pos_of_min_val
 
 
-def heuristic_using_manhatten_dist_cost_edge(cy, cx, end_points):
+def heuristic_using_manhatten_dist_cost_edge(cy, cx, remain_goals):
     selected = list()
-    un_selected = list(end_points)
+    un_selected = list(remain_goals)
 
     selected.append((cy, cx))
     manhatten_cost = 0
@@ -220,7 +223,7 @@ def astar_four_circles(maze):
     path = []
 
     ####################### Write Your Code Here ################################
-    print("Searching.. remaining goals :", len(end_points))
+    print("Searching.. remaining remain_goals :", len(end_points))
     sy, sx = start_point
 
     pre = dict()
@@ -238,30 +241,30 @@ def astar_four_circles(maze):
     heappush(pq, init_state)
     while pq:
         cur_state = heappop(pq)
-        _, _, cy, cx, goals = cur_state
-        if (cy, cx) in goals:
-            # goals에서 원소 하나 제거 후, 상태 이어 받음
-            goals, g, h, f, pre = downsize_goals(goals, cy, cx, g, h, f, pre)
-            cur_state = (f[(cy, cx, goals)], g[(cy, cx, goals)], cy, cx, goals)
+        _, _, cy, cx, remain_goals = cur_state
+        if (cy, cx) in remain_goals:
+            # remain goals에서 원소 하나 제거 후, 상태 이어 받음
+            remain_goals, g, h, f, pre = downsize_goals(remain_goals, cy, cx, g, h, f, pre)
+            cur_state = (f[(cy, cx, remain_goals)], g[(cy, cx, remain_goals)], cy, cx, remain_goals)
 
-        if len(goals) == 0:
+        if len(remain_goals) == 0:
             path = get_path_using_state_seq(pre, init_state, cur_state)
             break
 
         for ny, nx in maze.neighborPoints(cy, cx):
-            g[(ny, nx, goals)] = update_g(g, ny, nx, cy, cx, goals)
-            h[(ny, nx, goals)] = update_h(maze, h, ny, nx, goals, "m")  # means using 'm'anhatten dist edge
+            g[(ny, nx, remain_goals)] = update_g(g, ny, nx, cy, cx, remain_goals)
+            h[(ny, nx, remain_goals)] = update_h(maze, h, ny, nx, remain_goals,
+                                                 "m")  # means using 'm'anhatten dist edge
 
-            f[(ny, nx, goals)] = g[(ny, nx, goals)] + h[(ny, nx, goals)]
-            nxt_state = (f[(ny, nx, goals)], g[(ny, nx, goals)], ny, nx, goals)
-            if nxt_state in pq: continue
+            f[(ny, nx, remain_goals)] = g[(ny, nx, remain_goals)] + h[(ny, nx, remain_goals)]
+            nxt_state = (f[(ny, nx, remain_goals)], g[(ny, nx, remain_goals)], ny, nx, remain_goals)
             if nxt_state in pre: continue
 
             heappush(pq, nxt_state)
             pre[nxt_state] = cur_state
 
             if len(h) % 1000 == 0:
-                print("Searching.. remaining goals :", len(goals))
+                print("Searching.. remaining goals :", len(remain_goals))
     return path
 
     ############################################################################
@@ -378,29 +381,28 @@ def astar_many_circles(maze):
     heappush(pq, init_state)
     while pq:
         cur_state = heappop(pq)
-        _, _, cy, cx, goals = cur_state
-        if (cy, cx) in goals:
-            # goals에서 원소 하나 제거 후, 상태 이어 받음
-            goals, g, h, f, pre = downsize_goals(goals, cy, cx, g, h, f, pre)
-            cur_state = (f[(cy, cx, goals)], g[(cy, cx, goals)], cy, cx, goals)
+        _, _, cy, cx, remain_goals = cur_state
+        if (cy, cx) in remain_goals:
+            # remain goals에서 원소 하나 제거 후, 상태 이어 받음
+            remain_goals, g, h, f, pre = downsize_goals(remain_goals, cy, cx, g, h, f, pre)
+            cur_state = (f[(cy, cx, remain_goals)], g[(cy, cx, remain_goals)], cy, cx, remain_goals)
 
-        if len(goals) == 0:
+        if len(remain_goals) == 0:
             path = get_path_using_state_seq(pre, init_state, cur_state)
             break
 
         for ny, nx in maze.neighborPoints(cy, cx):
-            g[(ny, nx, goals)] = update_g(g, ny, nx, cy, cx, goals)
-            h[(ny, nx, goals)] = update_h(maze, h, ny, nx, goals, "p")  # means using 'p'ath_len edge
+            g[(ny, nx, remain_goals)] = update_g(g, ny, nx, cy, cx, remain_goals)
+            h[(ny, nx, remain_goals)] = update_h(maze, h, ny, nx, remain_goals, "p")  # means using 'p'ath_len edge
 
-            f[(ny, nx, goals)] = g[(ny, nx, goals)] + h[(ny, nx, goals)]
-            nxt_state = (f[(ny, nx, goals)], g[(ny, nx, goals)], ny, nx, goals)
-            if nxt_state in pq: continue
+            f[(ny, nx, remain_goals)] = g[(ny, nx, remain_goals)] + h[(ny, nx, remain_goals)]
+            nxt_state = (f[(ny, nx, remain_goals)], g[(ny, nx, remain_goals)], ny, nx, remain_goals)
             if nxt_state in pre: continue
 
             heappush(pq, nxt_state)
             pre[nxt_state] = cur_state
 
             if len(h) % 1000 == 0:
-                print("Searching.. remaining goals :", len(goals))
+                print("Searching.. remaining goals :", len(remain_goals))
     return path
     ############################################################################
