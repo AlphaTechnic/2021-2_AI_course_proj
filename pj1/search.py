@@ -1,11 +1,9 @@
 ###### Write Your Library Here ###########
 from collections import deque
 from heapq import *
-import pprint
-
-
 
 INF = 10 ** 9
+CACHE = dict()
 #########################################
 
 
@@ -118,6 +116,7 @@ def astar(maze):
     """
     start_point = maze.startPoint()
     end_point = maze.circlePoints()[0]
+    path = list()
 
     ####################### Write Your Code Here ################################
     sy, sx = start_point
@@ -163,6 +162,8 @@ def astar(maze):
 
 
 # -------------------- Stage 02: Four circles - A* Algorithm  ------------------------ #
+
+
 def delete_ele_in_arr(cy, cx, arr):
     new = list()
     for y, x in arr:
@@ -204,6 +205,7 @@ def get_path2(pre, init_state, final_state):
         cur_state = pre[cur_state]
         _, _, cy, cx, _ = cur_state
         if path[0] == (cy, cx): continue
+
         path.appendleft((cy, cx))
     return list(path)
 
@@ -254,15 +256,13 @@ def astar_four_circles(maze):
     f = dict()
 
     #  h를 결정하는 인자 = (위치 요소) + (남은 목적지들이 어떤게 있는지)
-    print(end_points)
-    print(type(end_points))
     g[(sy, sx, end_points)] = 0
     h[(sy, sx, end_points)] = stage2_heuristic(sy, sx, end_points)
     f[(sy, sx, end_points)] = g[(sy, sx, end_points)] + h[(sy, sx, end_points)]
 
     pq = list()
     init_state = (f[(sy, sx, end_points)], g[(sy, sx, end_points)], sy, sx, end_points)
-    heappush(pq, (f[(sy, sx, end_points)], g[(sy, sx, end_points)], sy, sx, end_points))
+    heappush(pq, init_state)
     while pq:
         cur_state = heappop(pq)
         _, _, cy, cx, goals = cur_state
@@ -273,7 +273,6 @@ def astar_four_circles(maze):
 
         if len(goals) == 0:
             path = get_path2(pre, init_state, cur_state)
-            print(path)
             break
 
         for ny, nx in maze.neighborPoints(cy, cx):
@@ -287,41 +286,96 @@ def astar_four_circles(maze):
 
             heappush(pq, nxt_state)
             pre[nxt_state] = cur_state
-            if len(h) % 1000 == 0:
-                print(len(h), "!!!!!!!!!")
     return path
-
+    # return astar_many_circles(maze)
 
     ############################################################################
-
 
 
 # -------------------- Stage 03: Many circles - A* Algorithm -------------------- #
 
-def mst(objectives, edges):
+def path_length_between(maze, start, end):
+    if (start, end) in CACHE:
+        return CACHE[(start, end)]
 
-    cost_sum=0
-    ####################### Write Your Code Here ################################
+    path = list()
+
+    sy, sx = start
+    ey, ex = end
+    R, C = maze.getDimensions()
+
+    # heuristic function 정의
+    h = [[0 for _ in range(C)] for _ in range(R)]
+    for r in range(R):
+        for c in range(C):
+            if not maze.isWall(r, c):
+                h_val = manhatten_dist((r, c), (ey, ex))
+                h[r][c] = h_val
+
+    g = [[INF for _ in range(C)] for _ in range(R)]
+    g[sy][sx] = 0
+    f = [[INF for _ in range(C)] for _ in range(R)]
+    f[sy][sx] = g[sy][sx] + h[sy][sx]
+
+    pre = [[(-1, -1) for _ in range(C)] for _ in range(R)]
+    pq = list()
+    heappush(pq, (f[sy][sx], sy, sx))
+    while pq:
+        _, cy, cx = heappop(pq)
+        if (cy, cx) == (ey, ex):
+            path = get_path(pre, sy, sx, ey, ex)
+            break
+
+        for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+            ny, nx = cy + dy, cx + dx
+            if not (0 <= ny < R and 0 <= nx < C): continue
+            if maze.isWall(ny, nx): continue
+
+            new_dist = g[cy][cx] + 1
+            if g[ny][nx] <= new_dist: continue  # edge cost가 모두 1
+
+            g[ny][nx] = new_dist
+            f[ny][nx] = g[ny][nx] + h[ny][nx]
+            heappush(pq, (f[ny][nx], ny, nx))
+            pre[ny][nx] = (cy, cx)
+
+        f[cy][cx] = -1
+
+    CACHE[(start, end)] = CACHE[(end, start)] = len(path)
+    return CACHE[(start, end)]
 
 
+def find_min_cost_edge(maze, selected, un_selected):
+    min_val = INF
+    pos_of_min_val = (-1, -1)
+    for vy, vx in selected:
+        for unvy, unvx in un_selected:
+            path_len = path_length_between(maze, (vy, vx), (unvy, unvx))
+            if path_len < min_val:
+                min_val = path_len
+                pos_of_min_val = (unvy, unvx)
+    return min_val, pos_of_min_val
 
 
+def heuristic_using_mst_cost(maze, cy, cx, end_points):
+    selected = list()
+    un_selected = list(end_points)
+
+    selected.append((cy, cx))
+    mst_cost = 0
+    while len(un_selected) != 0:
+        min_dist, pos_of_min_val = find_min_cost_edge(maze, selected, un_selected)
+        mst_cost += min_dist
+
+        selected.append(pos_of_min_val)
+        un_selected = delete_ele_in_arr(pos_of_min_val[0], pos_of_min_val[1], un_selected)
+    return mst_cost
 
 
-
-
-
-
-
-
-
-    return cost_sum
-
-    ############################################################################
-
-
-def stage3_heuristic():
-    pass
+def update_h2(maze, h, ny, nx, goals):
+    if (ny, nx, goals) not in h:
+        return heuristic_using_mst_cost(maze, ny, nx, goals)
+    return h[(ny, nx, goals)]
 
 
 def astar_many_circles(maze):
@@ -331,33 +385,53 @@ def astar_many_circles(maze):
     알고리즘을 활용한 heuristic function이어야 한다.)
     """
 
-    end_points= maze.circlePoints()
-    end_points.sort()
+    start_point = maze.startPoint()
+    end_points = tuple(maze.circlePoints())
 
-    path=[]
+    path = []
 
     ####################### Write Your Code Here ################################
+    print("Searching.. remaining goals :", len(end_points))
+    sy, sx = start_point
 
+    pre = dict()
+    g = dict()
+    h = dict()
+    f = dict()
 
+    #  h를 결정하는 인자 = (위치 요소) + (남은 목적지들이 어떤게 있는지)
+    g[(sy, sx, end_points)] = 0
+    h[(sy, sx, end_points)] = heuristic_using_mst_cost(maze, sy, sx, end_points)
+    f[(sy, sx, end_points)] = g[(sy, sx, end_points)] + h[(sy, sx, end_points)]
 
+    pq = list()
+    init_state = (f[(sy, sx, end_points)], g[(sy, sx, end_points)], sy, sx, end_points)
+    heappush(pq, init_state)
+    while pq:
+        cur_state = heappop(pq)
+        _, _, cy, cx, goals = cur_state
+        if (cy, cx) in goals:
+            # goals에서 원소 하나 제거 후, 상태 이어 받음
+            goals, g, h, f, pre = decrease_goals(goals, cy, cx, g, h, f, pre)
+            cur_state = (f[(cy, cx, goals)], g[(cy, cx, goals)], cy, cx, goals)
 
+        if len(goals) == 0:
+            path = get_path2(pre, init_state, cur_state)
+            break
 
+        for ny, nx in maze.neighborPoints(cy, cx):
+            g[(ny, nx, goals)] = update_g(g, ny, nx, cy, cx, goals)
+            h[(ny, nx, goals)] = update_h2(maze, h, ny, nx, goals)
 
+            f[(ny, nx, goals)] = g[(ny, nx, goals)] + h[(ny, nx, goals)]
+            nxt_state = (f[(ny, nx, goals)], g[(ny, nx, goals)], ny, nx, goals)
+            if nxt_state in pq: continue
+            if nxt_state in pre: continue
 
+            heappush(pq, nxt_state)
+            pre[nxt_state] = cur_state
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+            if len(h) % 1000 == 0:
+                print("Searching.. remaining goals :", len(goals))
     return path
-
     ############################################################################
