@@ -125,10 +125,11 @@ class AlphaBetaAgent(AdversialSearchAgent):
             mxv = - INF
             for action in state.getLegalActions(agent_index):
                 nxt_state = state.generateSuccessor(agent_index, action)
-                mxv = max(mxv, alphabeta_handler(nxt_state, depth, agent_index + 1, alpha, beta))
-                if mxv > beta:
+                eval = alphabeta_handler(nxt_state, depth, agent_index + 1, alpha, beta)
+                mxv = max(mxv, eval)
+                alpha = max(alpha, eval)
+                if alpha >= beta:  # pruning
                     return mxv
-                alpha = max(alpha, mxv)
             return mxv
 
         def min_player(state, depth, agent_index, alpha=-INF, beta=INF):
@@ -141,10 +142,11 @@ class AlphaBetaAgent(AdversialSearchAgent):
             mnv = INF
             for action in state.getLegalActions(agent_index):
                 nxt_state = state.generateSuccessor(agent_index, action)
-                mnv = min(mnv, alphabeta_handler(nxt_state, depth, nxt_agent, alpha, beta))
-                if mnv < alpha:
+                eval = alphabeta_handler(nxt_state, depth, nxt_agent, alpha, beta)
+                mnv = min(mnv, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:  # pruning
                     return mnv
-                beta = min(beta, mnv)
             return mnv
 
 
