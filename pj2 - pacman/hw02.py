@@ -149,7 +149,6 @@ class AlphaBetaAgent(AdversialSearchAgent):
                     return mnv
             return mnv
 
-
         self.agent_idx = self.index
         self.numAgents = gameState.getNumAgents()
         self.legalMoves = gameState.getLegalActions(self.index)
@@ -180,7 +179,6 @@ class ExpectimaxAgent(AdversialSearchAgent):
       (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
     """
 
-
     def Action(self, gameState):
         ####################### Write Your Code Here ################################
 
@@ -190,15 +188,15 @@ class ExpectimaxAgent(AdversialSearchAgent):
 
             if agent == 0:  # pacman
                 return max_player(state, agent, depth)
-            else:
+            else:  # ghost
                 return exp_player(state, agent, depth)
 
         def max_player(state, agent, depth):
-            maxVal = - INF
+            mxv = - INF
             for action in state.getLegalActions(agent):
                 nxt_state = state.generateSuccessor(agent, action)
-                maxVal = max(maxVal, expectimax_handler(nxt_state, agent + 1, depth))
-            return maxVal
+                mxv = max(mxv, expectimax_handler(nxt_state, agent + 1, depth))
+            return mxv
 
         def exp_player(state, agent, depth):
             if agent == self.numAgents - 1:  # ghost 끝남 -> 다시 pacman
@@ -214,7 +212,6 @@ class ExpectimaxAgent(AdversialSearchAgent):
                 exp_val += p * expectimax_handler(nxt_state, nxt_agent, depth)
             return exp_val
 
-        # set self.agent to refer to ghost
         self.agent = self.index
         self.depthCount = 0
         self.numAgents = gameState.getNumAgents()
@@ -229,7 +226,4 @@ class ExpectimaxAgent(AdversialSearchAgent):
 
         _, action_idx = heappop(pq)
         return self.legalMoves[action_idx]
-
-        # raise Exception("Not implemented yet")
-
         ############################################################################
