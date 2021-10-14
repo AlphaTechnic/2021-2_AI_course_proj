@@ -227,7 +227,7 @@ class ExpectimaxAgent(AdversialSearchAgent):
             cur_value = expectimax_handler(nxt_state, self.agent, self.depthCount)
             heappush(pq, (-cur_value, idx))
 
-        action_idx = heappop(pq)
+        _, action_idx = heappop(pq)
         return self.legalMoves[action_idx]
 
         # raise Exception("Not implemented yet")
