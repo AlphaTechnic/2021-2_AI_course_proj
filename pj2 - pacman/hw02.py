@@ -7,6 +7,7 @@ from game import Agent
 from heapq import *
 
 INF = 10 ** 9
+WANNA_KNOW_INIT_STATE_VAL = False
 
 
 ## Example Agent
@@ -98,8 +99,16 @@ class MinimaxAgent(AdversialSearchAgent):
             nxt_state = gameState.generateSuccessor(self.index, action)
             cur_value = minimax_handler(nxt_state, self.agent_idx, init_depth)
             heappush(pq, (-cur_value, idx))
+        neg_mxv, action_idx = heappop(pq)
 
-        _, action_idx = heappop(pq)
+        """
+        If you want to know initial state value, turn on WANNA_KNOW_INIT_STATE_VAL
+        """
+        global WANNA_KNOW_INIT_STATE_VAL
+        if WANNA_KNOW_INIT_STATE_VAL:
+            print("******", "Value of initial state : ", - neg_mxv, "******")
+            WANNA_KNOW_INIT_STATE_VAL = False
+
         return self.legalMoves[action_idx]
 
         ############################################################################
@@ -166,7 +175,15 @@ class AlphaBetaAgent(AdversialSearchAgent):
                 cur_value = nxt_value
             self.alpha = max(self.alpha, cur_value)
             heappush(pq, (-cur_value, idx))
-        _, action_idx = heappop(pq)
+        neg_mxv, action_idx = heappop(pq)
+
+        """
+        If you want to know initial state value, turn on WANNA_KNOW_INIT_STATE_VAL
+        """
+        global WANNA_KNOW_INIT_STATE_VAL
+        if WANNA_KNOW_INIT_STATE_VAL:
+            print("******", "Value of initial state : ", - neg_mxv, "******")
+            WANNA_KNOW_INIT_STATE_VAL = False
 
         return self.legalMoves[action_idx]
 
@@ -223,7 +240,15 @@ class ExpectimaxAgent(AdversialSearchAgent):
             nxt_state = gameState.generateSuccessor(self.index, action)
             cur_value = expectimax_handler(nxt_state, self.agent, self.depthCount)
             heappush(pq, (-cur_value, idx))
+        neg_mxv, action_idx = heappop(pq)
 
-        _, action_idx = heappop(pq)
+        """
+        If you want to know initial state value, turn on WANNA_KNOW_INIT_STATE_VAL
+        """
+        global WANNA_KNOW_INIT_STATE_VAL
+        if WANNA_KNOW_INIT_STATE_VAL:
+            print("******", "Value of initial state : ", - neg_mxv, "******")
+            WANNA_KNOW_INIT_STATE_VAL = False
+
         return self.legalMoves[action_idx]
         ############################################################################
