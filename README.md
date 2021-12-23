@@ -8,7 +8,7 @@
 
 ## pj1. maze
 
-![image-20210923191608500](./pj1 - maze/docs/imgs_for_doc/image-20210923191608500.png)
+![image-20210923191608500](./pj1\ -\ maze/docs/imgs_for_doc/image-20210923191608500.png)
 
 ### stage1 - bfs vs astar
 
