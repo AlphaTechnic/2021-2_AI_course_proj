@@ -8,7 +8,7 @@
 
 ## pj1. maze
 
-![image-20210923191608500](./pj1\ -\ maze/docs/imgs_for_doc/image-20210923191608500.png)
+![image-20210923191608500](./imgs_for_README/pj1_img1.png)
 
 ### stage1 - bfs vs astar
 
@@ -32,9 +32,9 @@
 
 ## pj2. pacman
 
-![image-20210923191608500](./imgs_for_README/game_img.png)
+![image-20210923191608500](./imgs_for_README/pj2_img1.png)
 
-![image-20210923191608500](./imgs_for_README/dep_idx.png)
+![image-20210923191608500](./imgs_for_README/pj2_img2.png)
 
 ### 정리
 
@@ -50,15 +50,15 @@
 
 ## pj3. logical agent
 
-![image-20210923191608500](./imgs_for_README/problem3.png)
+![image-20210923191608500](./imgs_for_README/pj3_img1.png)
 
-![image-20210923191608500](./imgs_for_README/problem4.png)
+![image-20210923191608500](./imgs_for_README/pj3_img2.png)
 
 
 
 ## pj4. MLP vs CNN
 
-![image-20210923191608500](./imgs_for_README/input_imgs.png)
+![image-20210923191608500](./imgs_for_README/pj4_img1.png)
 
-![image-20210923191608500](./pj4 - MLP vs CNN/res.jpg)
+![image-20210923191608500](./imgs_for_README/pj4_img2.jpg)
 
